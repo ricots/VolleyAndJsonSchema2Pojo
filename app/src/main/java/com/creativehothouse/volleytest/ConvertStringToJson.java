@@ -6,6 +6,7 @@ import com.creativehothouse.volleytest.entities.Audio;
 import com.creativehothouse.volleytest.entities.Clipsters;
 import com.creativehothouse.volleytest.entities.DataUser;
 import com.creativehothouse.volleytest.entities.Datum;
+import com.creativehothouse.volleytest.entities.Feeds;
 import com.creativehothouse.volleytest.entities.Video;
 
 import org.codehaus.jackson.JsonParseException;
@@ -45,6 +46,11 @@ public class ConvertStringToJson {
         public static Video jsonToVideo (String json, Context context) throws  JsonParseException, JsonMappingException, IOException{
             Video video = new ObjectMapper().readValue(json, Video.class);
             return video;
+        }
+
+        public static Feeds getFeeds(String json, Context context) throws  JsonParseException, JsonMappingException, IOException{
+            Feeds mFeeds = new ObjectMapper().readValue(json, Feeds.class);
+            return mFeeds;
         }
 
 }

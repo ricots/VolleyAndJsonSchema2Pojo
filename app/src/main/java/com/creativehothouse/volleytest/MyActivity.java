@@ -2,71 +2,82 @@ package com.creativehothouse.volleytest;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.ListView;
 
-import com.creativehothouse.volleytest.entities.DataUser;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.creativehothouse.volleytest.adapters.FeedAdapter;
+import com.creativehothouse.volleytest.entities.Feed;
+import com.creativehothouse.volleytest.entities.Feeds;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 
 
 public class MyActivity extends Activity {
 
-    private static final String TOKEN = "CAACl5lV8pcIBAF3LxU7e73xgCLJXRvOr0jK7A5ZCjrlBQsvcc8gEDxMCXmWkZCLqI6E2VpSqO2dDXmH3ZCQkriDU5j5xEKj4ZCl89ZAZAZAHejMoZCIzoyn9rkfOY7ZCS2b9UiLRDZCd9PyaYC1zxy5t6hiIYeZCC0OLjMsd57JxC7RiIZBLsQgYwxPoZB826zHrWZBKdlGdniP8WmFvdGfNkE0HpBsXQZCtQoIwpQBlde2eFapJwZDZD";
-
-    private HashMap<String,String> params;
-    private static final String SERVER = "http://api.beta.clipsterapp.com";
-    private RequestManager requestManager;
-
-    private DataUser mUser;
+    private static final String SERVER = "http://api.androidhive.info/feed/feed.json";
+    private JsonObjectRequest mJsonObjectRequest;
+    private Feeds myFeeds;
+    private FeedAdapter adapter;
+    private ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
-        params = new HashMap<String, String>();
-        params.put("provider","facebook");
-        params.put("token",TOKEN);
-
-        requestManager = new RequestManager();
-        requestManager.postRequest(SERVER + "/login",params,new OnRequestFinish() {
-            @Override
-            public void onComplete(JSONObject response) {
-                Log.i("response",response.toString());
-                try{
+        adapter = new FeedAdapter(this);
+        mListView   = (ListView)findViewById(R.id.listView);
 
 
-                    mUser = ConvertStringToJson.jsonToUser(response.toString(),MyActivity.this);
+        mJsonObjectRequest = new JsonObjectRequest(SERVER,null,mObjectListener,errorListener);
+        ApplicationVolley.getInstance().addToRequestQueue(mJsonObjectRequest);
+
+    }
 
 
-                }catch (JsonParseException e){
-                    //mUser = null;
-                    Log.i("MyActivity","JsonParseException " + e.getMessage());
-                }catch (JsonMappingException e){
-                    //mUser = null;
-                    Log.i("MyActivity","JsonMappingException " + e.getMessage());
-                }catch (IOException e){
-                    //mUser = null;
-                    Log.i("MyActivity","IOException" + e.getMessage());
-//                }catch (JSONException e){
-
-                }
+    private Response.Listener<JSONObject> mObjectListener = new Response.Listener<JSONObject>() {
+        @Override
+        public void onResponse(JSONObject jsonObject) {
+            //Log.i("response : ", jsonObject.toString());
 
 
-
-                if (mUser != null)
-                    Log.i("MyActivity","Nama : " + mUser.getUser().getName());
-
-
+            try{
+                myFeeds = ConvertStringToJson.getFeeds(jsonObject.toString(),getApplicationContext());
+            }catch (JsonParseException e){
+                myFeeds = null;
+            }catch (JsonMappingException e){
+                myFeeds = null;
+            }catch (IOException e){
+                myFeeds = null;
             }
-        });
+
+            if (myFeeds != null)
+                setData(myFeeds);
+        }
+    };
 
 
+    private Response.ErrorListener errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError volleyError) {
+
+        }
+    };
+
+
+    private List<Feed> feeds;
+    private void setData(Feeds myFeeds){
+        feeds = myFeeds.getFeed();
+        adapter.setData(feeds);
+
+        mListView.setAdapter(adapter);
     }
 
 }
