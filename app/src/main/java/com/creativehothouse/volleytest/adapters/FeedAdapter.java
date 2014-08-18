@@ -1,7 +1,6 @@
 package com.creativehothouse.volleytest.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,12 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
-import com.creativehothouse.volleytest.ApplicationVolley;
+import com.android.volley.toolbox.ImageLoader;
 import com.creativehothouse.volleytest.R;
 import com.creativehothouse.volleytest.entities.Feed;
+import com.creativehothouse.volleytest.server.RequestManager;
 
 import java.util.List;
 
@@ -76,9 +73,8 @@ public class FeedAdapter extends BaseAdapter {
 
         holder.name.setText(data.get(position).getName());
         holder.status.setText(data.get(position).getStatus());
-       setImage(holder.avatar,data.get(position).getProfilePic());
-
-
+       
+        RequestManager.getInstance(context).getImageLoader().get(data.get(position).getProfilePic(), ImageLoader.getImageListener(holder.avatar,R.drawable.ic_launcher,R.drawable.ic_launcher));
 
         return convertView;
     }
@@ -90,22 +86,5 @@ public class FeedAdapter extends BaseAdapter {
     }
 
 
-    private ImageRequest imageRequest;
-    private void setImage(final ImageView imageView,String url){
-        imageRequest  = new ImageRequest(url,
-                new Response.Listener<Bitmap>(){
-                    @Override
-                    public void onResponse(Bitmap bitmap) {
-                        imageView.setImageBitmap(bitmap);
-                    }
-                }, 0, 0, null,
-                new Response.ErrorListener() {
-                    public void onErrorResponse(VolleyError error) {
-                        imageView.setImageResource(R.drawable.ic_launcher);
-                    }
-                });
 
-
-        ApplicationVolley.getInstance().addToRequestQueue(imageRequest);
-    }
 }
